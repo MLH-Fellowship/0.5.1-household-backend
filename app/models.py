@@ -2,6 +2,7 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 user_house = db.Table(
+    "user_houses",
     db.Column("house_id", db.Integer, db.ForeignKey("house.id"), primary_key=True),
     db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
 )
@@ -32,12 +33,6 @@ class House(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
     description = db.Column(db.String(1024))
-    users = db.relationship(
-        "User",
-        secondary=user_house,
-        lazy="subquery",
-        backref=db.backref("houses", lazy=True),
-    )
 
 
 class Task(db.Model):
