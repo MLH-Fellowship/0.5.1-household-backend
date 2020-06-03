@@ -1,6 +1,11 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+user_house = db.Table(
+    db.Column("house_id", db.Integer, db.ForeignKey("house.id"), primary_key=True),
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+)
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,12 +38,6 @@ class House(db.Model):
         lazy="subquery",
         backref=db.backref("houses", lazy=True),
     )
-
-
-user_house = db.Table(
-    db.Column("house_id", db.Integer, db.ForeignKey("house.id"), primary_key=True),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
-)
 
 
 class Task(db.Model):
