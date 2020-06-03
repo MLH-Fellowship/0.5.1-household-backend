@@ -33,6 +33,8 @@ def create_app() -> Flask:
     migrate.init_app(app, db)
     jwt.init_app(app)
     from app.auth import auth_blueprint
+    from app.task import task_blueprint
 
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(task_blueprint)
     return app
