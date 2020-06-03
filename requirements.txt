@@ -6,3 +6,4 @@ pytest
 psycopg2
 pytest-cov
 rq
+requests
