@@ -2,8 +2,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from rq import Queue
+from worker import conn
 import os
 
+q = Queue(connection=conn)
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
