@@ -8,14 +8,23 @@ on:
 
 jobs:
   test:
-    runs-on: ${{matrix.os}}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
@@ -28,6 +37,9 @@ jobs:
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with unittest
+    - name: Test with PyTest
       run: |
-        python -m unittest tests
+        flask db upgrade
+        pytest --cov=app app/test_e2e.py
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost/postgres
