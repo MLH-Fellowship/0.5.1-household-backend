@@ -8,8 +8,7 @@ user_task_blueprint = Blueprint("user_task", __name__)
 @user_task_blueprint.route("/task/<id>/user_task", \
                            methods=("GET",))
 def get_task(identifier):
-    user_task: UserTask = UserTask.query.filter(
-        UserTask.id == identifier
+    user_task: UserTask = UserTask.query.get(identifier)
     ).first()
 
     if not user_task:
