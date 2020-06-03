@@ -15,12 +15,7 @@ class User(db.Model):
     email_verified = db.Column(db.Boolean)
     password_hash = db.Column(db.String(1024))
 
-    houses = db.relationship(
-        "House",
-        secondary=user_house,
-        lazy="subquery",
-        backref=db.backref("users", lazy=True),
-    )
+    houses = db.relationship("House", secondary=user_house)
 
     def set_password(self, password) -> None:
         self.password_hash = generate_password_hash(password)

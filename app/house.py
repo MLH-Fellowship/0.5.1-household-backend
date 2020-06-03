@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, request
+from flask import Blueprint, jsonify, current_app, request, url_for
 from app.models import House, User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.utils import error_missing_json_key
@@ -28,24 +28,25 @@ def add_house():
     )
 
 
-@house_blueprint.route("/house/user/join")
+@house_blueprint.route("/user/join")
 @jwt_required
 def join_house():
+    token = request.args["token"]
     user = get_jwt_identity()
-    db_user: User = User.query.get(user["id"])
+    db_user: User = User.query.get(user)
     if not user:
         return (
             jsonify(msg="The supplied token was invalid.", status="error", data=""),
             400,
         )
-    token = request.args.get("token")
-    if not token:
-        return (
-            jsonify(msg="The supplied token was invalid.", status="error", data=""),
-            400,
-        )
     try:
-        decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"])
+        try:
+            decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"])
+        except jwt.DecodeError:
+            return (
+                jsonify(msg="The supplied token was invalid.", status="error", data=""),
+                400,
+            )
         if decoded_token["token_type"] == "specific_join_house":
             if db_user.id == decoded_token["user_id"]:
                 User.houses.append(House.query.get(decoded_token["house_id"]))
@@ -65,6 +66,16 @@ def join_house():
                         "data": "",
                     }
                 )
+        elif decoded_token["token_type"] == "generic_join_house":
+            db_user.houses.append(House.query.get(decoded_token["house_id"]))
+            db.session.commit()
+            return jsonify(
+                {
+                    "msg": "You are now in this house.",
+                    "data": decoded_token["house_id"],
+                    "status": "success",
+                }
+            )
     except jwt.DecodeError:
         return (
             jsonify(msg="The supplied token was invalid.", status="error", data=""),
@@ -72,7 +83,7 @@ def join_house():
         )
 
 
-@house_blueprint.route("/house/<int:house_id>/user/invite/<string:identifier>")
+@house_blueprint.route("/<int:house_id>/user/invite/<string:identifier>")
 def specific_email(house_id, identifier):
     house = House.query.get(house_id)
     if not house.users.filter(
@@ -120,13 +131,31 @@ def specific_email(house_id, identifier):
         )
 
 
-@house_blueprint.route("/house/<int:house_id>/user/invite")
+@house_blueprint.route("/user")
+@jwt_required
+def all_user_houses():
+    user = get_jwt_identity()
+    db_user: User = User.query.get(user)
+    return_data = jsonify(
+        {
+            "data": list(map(lambda x: x.id, db_user.houses)),
+            "msg": "",
+            "status": "success",
+        }
+    )
+    return return_data
+
+
+@house_blueprint.route("/<int:house_id>/user/invite")
 def generic_invite(house_id):
     house = House.query.get(house_id)
     if house:
-        token = jwt.encode(
-            {"token_type": "generic_join_house", house_id: house.id},
-            current_app.config["SECRET_KEY"],
+        token = url_for(
+            "house.join_house",
+            token=jwt.encode(
+                {"token_type": "generic_join_house", "house_id": house.id},
+                current_app.config["SECRET_KEY"],
+            ),
         )
         return jsonify(data=token, msg="", status="success")
     else:
