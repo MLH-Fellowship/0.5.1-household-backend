@@ -17,7 +17,6 @@ class User(db.Model):
 
 class House(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    invite_link = db.Column(db.String(64), index=True, unique=True)
     name = db.Column(db.String(64), index=True, unique=True)
     description= db.Column(db.String(1024))
 
