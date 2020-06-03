@@ -18,6 +18,6 @@ def get_task(identifier):
     data["user_id"] = user_task.user_id
     data["task_id"] = user_task.task_id
     data["deadline"] = user_task.deadline
-    # TODO: house_id?
+    data["house_id"] = user_task.house_id
 
     return jsonify(data=data), 200
