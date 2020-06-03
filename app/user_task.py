@@ -8,7 +8,7 @@ user_task_blueprint = Blueprint("user_task", __name__)
 @user_task_blueprint.route("/task/<id>/user_task", \
                            methods=("GET",))
 def get_task(identifier):
-    user_task: UserTask = UserTask.query.get(identifier)).first()
+    user_task: UserTask = UserTask.query.get(identifier)
 
     if not user_task:
         return jsonify({"msg": "A user_task with that identifier does not exist."}), 403
