@@ -20,9 +20,6 @@ class House(db.Model):
     name = db.Column(db.String(64), index=True, unique=True)
     description = db.Column(db.String(1024))
 
-    def update_invite_link(self, link) -> None:
-        self.invite_link = link
-
 class UserHouse(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     house_id = db.Column(db.Integer, primary_key=True)
