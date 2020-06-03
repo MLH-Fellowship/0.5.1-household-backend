@@ -44,13 +44,14 @@ user_house = db.Table(
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    house_id = db.Column(db.Integer)
+    house_id = db.Column(db.Integer, db.ForeignKey("house.id"))
     description = db.Column(db.String(1024))
     frequency = db.Column(db.Integer)
 
 
 class UserTask(db.Model):
-    task_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey("task.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     deadline = db.Column(db.DateTime)
     done = db.Column(db.Boolean)
