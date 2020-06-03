@@ -24,7 +24,7 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
@@ -40,6 +40,6 @@ jobs:
     - name: Test with PyTest
       run: |
         flask db upgrade
-        pytest
+        pytest --cov=app app/test_e2e.py
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost/postgres

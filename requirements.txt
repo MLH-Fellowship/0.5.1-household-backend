@@ -4,3 +4,4 @@ flask-migrate
 flask-jwt-extended
 pytest
 psycopg2
+pytest-cov
