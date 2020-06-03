@@ -32,7 +32,8 @@ class Task(db.Model):
     frequency = db.Column(db.Integer)
 
 class UserTask(db.Model):
-    task_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer)
     deadline = db.Column(db.DateTime)
     done = db.Column(db.Boolean)
