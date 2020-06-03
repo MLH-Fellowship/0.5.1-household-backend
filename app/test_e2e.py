@@ -1,5 +1,7 @@
 import pytest
 
+import os
+
 from flask.testing import Client
 from app import create_app
 
@@ -29,3 +31,15 @@ def test_register_user(client: Client):
     ))
     json = resp.get_json()
     assert json["msg"] == "Created a new user."
+    assert json["status"] == "success"
+
+
+@pytest.mark.serial
+def test_login_user(client: Client):
+    resp = client.post("/auth/login", json=dict(
+        identifier=TEST_USER1_USERNAME,
+        password=TEST_USER1_PASSWORD
+    ))
+    json = resp.get_json()
+    assert json["status"] == "success"
+    assert len(json["data"]) > 5

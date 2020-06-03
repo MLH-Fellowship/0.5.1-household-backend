@@ -24,7 +24,7 @@ def register():
     except DatabaseError as error:
         return jsonify({"msg": "Couldn't create a new user. Failed with error: '{}'".format(error)}), 500
     db.session.refresh(new_user)
-    return jsonify({"msg": "Created a new user.", "data": new_user.id})
+    return jsonify({"msg": "Created a new user.", "data": new_user.id, "status": "success"})
 
 
 @auth_blueprint.route("/login", methods=("POST",))
@@ -34,11 +34,11 @@ def login():
     if (not identifier) or (not password):
         return error_missing_json_key("identifier", "password")
     user: User = User.query.filter(
-        User.username == identifier | User.email == identifier).first()
+        (User.username == identifier) | (User.email == identifier)).first()
     if not user:
         return jsonify({"msg": "A user with those details does not exist."}), 403
-    if user.check_password(password):
+    if not user.check_password(password):
         access_token = create_access_token(identity=user.id)
-        return jsonify(access_token=access_token), 200
+        return jsonify(data=access_token, status="success", msg=""), 200
     else:
-        return jsonify({"msg": "The provided password is incorrect."}), 403
+        return jsonify({"msg": "The provided password is incorrect.", "status": "error"}), 403
