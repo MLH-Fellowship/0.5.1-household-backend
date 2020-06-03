@@ -11,7 +11,8 @@ def get_task(identifier):
     user_task: UserTask = UserTask.query.get(identifier)
 
     if not user_task:
-        return jsonify({"msg": "A user_task with that identifier does not exist."}), 403
+        return jsonify({"data": identifier, "status": "error", \
+            "msg": "A user_task with that identifier does not exist."}), 403
 
     data = {}
     data["user_id"] = user_task.user_id
@@ -23,4 +24,4 @@ def get_task(identifier):
                                                    user_task.user_id).first()
     data["house_id"] = user_house.house_id
 
-    return jsonify(data=data), 200
+    return jsonify(data=data, msg="", status="success"), 200
