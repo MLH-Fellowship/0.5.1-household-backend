@@ -37,5 +37,5 @@ class Task(db.Model):
 class UserTask(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, primary_key=True)
-    # Deadline
+    deadline = db.Column(db.DateTime)
     # done
