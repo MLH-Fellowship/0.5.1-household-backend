@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import User
+from app.models import User
 from app import db
 from flask_jwt_extended import create_access_token
 from sqlalchemy.exc import DatabaseError
@@ -8,12 +8,13 @@ from app.utils import error_missing_json_key
 auth_blueprint = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-@auth_blueprint.route("/register")
+@auth_blueprint.route("/register", methods=("POST",))
 def register():
-    username = request.json["username"]
-    email = request.json["email"]
-    password = request.json["password"]
-    if (not username) or (not email) or (not password):
+    try:
+        username = request.json["username"]
+        email = request.json["email"]
+        password = request.json["password"]
+    except TypeError:
         return error_missing_json_key("username", "email", "password")
     new_user = User(email=email, username=username, email_verified=False)
     new_user.set_password(password)
@@ -23,10 +24,10 @@ def register():
     except DatabaseError as error:
         return jsonify({"msg": "Couldn't create a new user. Failed with error: '{}'".format(error)}), 500
     db.session.refresh(new_user)
-    return jsonify({"msg": "Created a new user", "data": new_user.id})
+    return jsonify({"msg": "Created a new user.", "data": new_user.id})
 
 
-@auth_blueprint.route("/login")
+@auth_blueprint.route("/login", methods=("POST",))
 def login():
     identifier = request.json["identifier"]
     password = request.json["password"]
