@@ -9,7 +9,6 @@ user_task_blueprint = Blueprint("user_task", __name__)
                            methods=("GET",))
 def get_task(identifier):
     user_task: UserTask = UserTask.query.get(identifier)
-        UserTask.id == identifier
     ).first()
 
     if not user_task:
