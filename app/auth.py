@@ -39,7 +39,7 @@ def login():
         (User.username == identifier) | (User.email == identifier)).first()
     if not user:
         return jsonify({"msg": "A user with those details does not exist."}), 403
-    if not user.check_password(password):
+    if user.check_password(password):
         access_token = create_access_token(identity=user.id)
         return jsonify(data=access_token, status="success", msg=""), 200
     else:
