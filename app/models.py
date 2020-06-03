@@ -14,3 +14,25 @@ class User(db.Model):
 
     def check_password(self, password) -> bool:
         return check_password_hash(self.password_hash, password)
+
+class House(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), index=True, unique=True)
+    description = db.Column(db.String(1024))
+
+class UserHouse(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
+    house_id = db.Column(db.Integer, primary_key=True)
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    house_id = db.Column(db.Integer)
+    description= db.Column(db.String(1024))
+    frequency = db.Column(db.Integer)
+
+class UserTask(db.Model):
+    task_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
+    deadline = db.Column(db.DateTime)
+    done = db.Column(db.Boolean)

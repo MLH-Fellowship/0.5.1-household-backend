@@ -7,3 +7,5 @@ psycopg2
 pytest-cov
 rq
 requests
+gunicorn
+eventlet
