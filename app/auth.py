@@ -30,6 +30,7 @@ def register():
 @auth_blueprint.route("/login", methods=("POST",))
 def login():
     try:
+        # either the user's username or email
         identifier = request.json["identifier"]
         password = request.json["password"]
     except TypeError:
