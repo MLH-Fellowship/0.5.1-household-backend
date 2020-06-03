@@ -1,10 +1,10 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from app.models import Task
 
 
 task_blueprint = Blueprint("task", __name__)
 
-@user_task_blueprint.route("/task/<int:identifier>/", \
+@task_blueprint.route("/task/<int:identifier>/", \
                            methods=("GET",))
 def get_task(identifier):
     task: Task = Task.query.get(identifier)
@@ -25,7 +25,7 @@ def get_task(identifier):
     return jsonify(data=data, msg="", status="success"), 200
 
 
-@user_task_blueprint.route("/task/<int:identifier>/update/", \
+@task_blueprint.route("/task/<int:identifier>/update/", \
                            methods=("POST",))
 def update_task(identifier):
     task: Task = Task.query.get(identifier)
