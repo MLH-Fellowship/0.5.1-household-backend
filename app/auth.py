@@ -85,8 +85,8 @@ def login():
         )
 
 
-@auth_blueprint.route("/password_reset/reset_form/<token>")
-def reset_password_form():
+@auth_blueprint.route("/password_reset/reset_form/<string:token>")
+def reset_password_form(token):
     try:
         token = jwt.decode(token, os.environ.get("SECRET_KEY"))
     except:
