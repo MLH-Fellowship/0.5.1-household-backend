@@ -16,11 +16,14 @@ def create_app() -> Flask:
     def index():
         return "Hello World!"
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "DATABASE_URL") if os.environ.get("DATABASE_URL") else "sqlite:///" + os.path.join(os.curdir, "app.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + \
+        os.path.join(os.curdir, "app.db")
+    if os.environ.get("DATABASE_URL"):
+        app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") if os.environ.get(
-        "SECRET_KEY") else str(os.urandom(512))
+    app.config["SECRET_KEY"] = str(os.urandom(512))
+    if os.environ.get("SECRET_KEY"):
+        app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
