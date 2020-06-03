@@ -31,7 +31,7 @@ def add_house():
 @house_blueprint.route("/house/user/join")
 @jwt_required
 def join_house():
-    user = get_jwt_claims()
+    user = get_jwt_identity()
     db_user: User = User.query.get(user["id"])
     if not user:
         return (
@@ -53,7 +53,7 @@ def join_house():
                 return jsonify(
                     {
                         "msg": "You are now in this house.",
-                        "data": house.id,
+                        "data": decoded_token["house_id"],
                         "status": "success",
                     }
                 )
