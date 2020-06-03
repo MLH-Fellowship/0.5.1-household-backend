@@ -16,11 +16,13 @@ def create_app() -> Flask:
     def index():
         return "Hello World!"
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + \
-        os.path.join(os.curdir, "app.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
+        os.curdir, "app.db"
+    )
     if os.environ.get("DATABASE_URL"):
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["JWT_HEADER_TYPE"] = ""
     app.config["SECRET_KEY"] = str(os.urandom(512))
     if os.environ.get("SECRET_KEY"):
         app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
@@ -28,5 +30,6 @@ def create_app() -> Flask:
     migrate.init_app(app, db)
     jwt.init_app(app)
     from app.auth import auth_blueprint
+
     app.register_blueprint(auth_blueprint)
     return app
