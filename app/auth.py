@@ -29,9 +29,10 @@ def register():
 
 @auth_blueprint.route("/login", methods=("POST",))
 def login():
-    identifier = request.json["identifier"]
-    password = request.json["password"]
-    if (not identifier) or (not password):
+    try:
+        identifier = request.json["identifier"]
+        password = request.json["password"]
+    except TypeError:
         return error_missing_json_key("identifier", "password")
     user: User = User.query.filter(
         (User.username == identifier) | (User.email == identifier)).first()
