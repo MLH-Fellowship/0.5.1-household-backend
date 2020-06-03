@@ -34,8 +34,10 @@ def create_app() -> Flask:
     jwt.init_app(app)
 
     # Register blueprints
-    from app import auth, user_task
-    app.register_blueprint(auth.auth_blueprint)
-    app.register_blueprint(user_task.user_task_blueprint)
+    from app.auth import auth_blueprint
+    from app.user_task import user_task_blueprint
+
+    app.register_blueprint(auth_blueprint)
+    app.register_blueprint(user_task_blueprint)
 
     return app
