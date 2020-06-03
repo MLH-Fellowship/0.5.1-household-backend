@@ -9,6 +9,16 @@ on:
 jobs:
   test:
     runs-on: ${{matrix.os}}
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -30,4 +40,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
-        python -m unittest tests
+        pytest
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost/postgres
