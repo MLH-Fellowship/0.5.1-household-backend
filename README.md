@@ -1,6 +1,6 @@
 # Household Task Management
 
-Runing migartions.
+Runing migrations.
 
 ```
 # 1. set up virtual environment
