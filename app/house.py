@@ -40,13 +40,7 @@ def join_house():
             400,
         )
     try:
-        try:
-            decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"])
-        except jwt.DecodeError:
-            return (
-                jsonify(msg="The supplied token was invalid.", status="error", data=""),
-                400,
-            )
+        decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"])
         if decoded_token["token_type"] == "specific_join_house":
             if db_user.id == decoded_token["user_id"]:
                 User.houses.append(House.query.get(decoded_token["house_id"]))
