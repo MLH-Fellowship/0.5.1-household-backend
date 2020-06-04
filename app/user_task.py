@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from app.models import UserTask, Task, User, House
+from app.models import Task, User, House
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 
