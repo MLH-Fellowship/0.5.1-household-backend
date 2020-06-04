@@ -115,21 +115,28 @@ def reset_password(identifier):
     ).first()
     if not user:
         return {"msg": "That user does not exist.", "status": "error", "data": ""}
-    reset_link = jwt.encode(
-        {"user_id": user.id, "token_type": "reset_password", "exp": time.time() + 3600},
-        current_app.secret_key,
+    reset_link = url_for(
+        "auth.reset_password_form",
+        token=jwt.encode(
+            {
+                "user_id": user.id,
+                "token_type": "reset_password",
+                "exp": time.time() + 3600,
+            },
+            current_app.secret_key,
+        ),
     )
     html_content = render_template("password_email_reset.jinja", reset_link=reset_link)
     send_email(
         user.email,
-        "Reset your email",
+        "Reset your password.",
         html_content,
         "Follow this link to reset your password: {}".format(reset_link),
     )
     return "Check your inbox for a password reset."
 
 
-@auth_blueprint.route("/password_reset/reset/<string:token>")
+@auth_blueprint.route("/password_reset/reset/<string:token>", methods=("POST",))
 def perform_reset(token):
     password = request.form["password"]
     password2 = request.form["password2"]
@@ -144,7 +151,7 @@ def perform_reset(token):
             user: User = User.query.get(token["user_id"])
             user.set_password(password)
             db.session.commit()
-            return "Your password has been reset"
+            return "Your password has been reset."
         else:
             return "The token supplied is not valid."
     except TypeError:

@@ -1,5 +1,7 @@
 import pytest
 
+import re
+
 from flask import g
 
 import jwt
@@ -10,6 +12,7 @@ from app import create_app, mail
 
 TEST_USER1_USERNAME = "Person 1"
 TEST_USER1_EMAIL = "person1@example.com"
+TEST_USER1_OLD_PASSWORD = "FAk3_passw0rd"
 TEST_USER1_PASSWORD = "Test_passw0rd"
 
 TEST_USER2_USERNAME = "Person 2"
@@ -59,7 +62,7 @@ def test_register_user(client: Client):
             json=dict(
                 username=TEST_USER1_USERNAME,
                 email=TEST_USER1_EMAIL,
-                password=TEST_USER1_PASSWORD,
+                password=TEST_USER1_OLD_PASSWORD,
             ),
         )
         json = resp.get_json()
@@ -70,6 +73,23 @@ def test_register_user(client: Client):
         assert email_verify_resp.data == b"Successfully verified your email."
         assert json["msg"] == "Created a new user."
         assert json["status"] == "success"
+
+
+@pytest.mark.serial
+def test_user_reset_password(client: Client):
+    with mail.record_messages() as outbox:
+        client.get("/auth/password_reset/{}".format(TEST_USER1_EMAIL))
+        assert outbox[0].subject == "Reset your password."
+        body_text: str = outbox[0].body
+        body_text = body_text.replace(
+            "Follow this link to reset your password: /auth/password_reset/reset_form/",
+            "",
+        )
+        email_verify_resp = client.post(
+            "/auth/password_reset/reset/{}".format(body_text),
+            data={"password": TEST_USER1_PASSWORD, "password2": TEST_USER1_PASSWORD},
+        )
+        assert re.match(b"Your password has been reset.", email_verify_resp.data)
 
 
 @pytest.mark.serial
