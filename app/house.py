@@ -106,29 +106,28 @@ def specific_email(house_id, identifier):
             ),
             404,
         )
-    if house:
-        token = jwt.encode(
-            {
-                "token_type": "specific_join_house",
-                "house_id": house.id,
-                "user_id": user.id,
-            },
-            current_app.config["SECRET_KEY"],
-        )
-        return jsonify(
-            {
-                "msg": "Successfully created an invite link",
-                "status": "success",
-                "data": token,
-            }
-        )
-    else:
+    if not house:
         return (
             jsonify(
                 status="error", msg="A house with that ID cannot be found", data=""
             ),
             404,
         )
+    token = jwt.encode(
+        {
+            "token_type": "specific_join_house",
+            "house_id": house.id,
+            "user_id": user.id,
+        },
+        current_app.config["SECRET_KEY"],
+    )
+    return jsonify(
+        {
+            "msg": "Successfully created an invite link",
+            "status": "success",
+            "data": token,
+        }
+    )
 
 
 @house_blueprint.route("/user")
