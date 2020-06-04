@@ -8,6 +8,7 @@ import jwt
 import os
 from app.utils import send_email
 import time
+import datetime
 
 auth_blueprint = Blueprint(
     "auth", __name__, url_prefix="/auth", template_folder="/templates"
@@ -76,7 +77,13 @@ def login():
     if not user:
         return jsonify({"msg": "A user with those details does not exist."}), 403
     if user.check_password(password):
-        access_token = create_access_token(identity=user.id)
+        try:
+            access_token = create_access_token(
+                identity=user.id,
+                expires_delta=datetime.timedelta(seconds=request.json["custom_expiry"]),
+            )
+        except KeyError:
+            access_token = create_access_token(identity=user.id)
         return jsonify(data=access_token, status="success", msg=""), 200
     else:
         return (

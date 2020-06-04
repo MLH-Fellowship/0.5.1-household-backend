@@ -1,5 +1,6 @@
 import pytest
 
+import jwt
 import os
 
 from flask.testing import Client
@@ -59,6 +60,20 @@ def test_register_user(client: Client):
     json = resp.get_json()
     assert json["msg"] == "Created a new user."
     assert json["status"] == "success"
+
+
+@pytest.mark.serial
+def test_login_user_custom_expiry(client: Client):
+    token = client.post(
+        "/auth/login",
+        json={
+            "identifier": TEST_USER1_EMAIL,
+            "password": TEST_USER1_PASSWORD,
+            "custom_expiry": 1000,
+        },
+    ).get_json()
+    decoded = jwt.decode(token["data"], verify=False)
+    assert (decoded["exp"] - 1000) == decoded["iat"]
 
 
 @pytest.mark.serial
