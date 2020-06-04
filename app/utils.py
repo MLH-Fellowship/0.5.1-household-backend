@@ -36,7 +36,7 @@ def send_email(
     subject,
     html,
     text,
-    from_email="bureaucrat@hackathon-household-app.herokuapp.com/",
+    from_email="household@teymour.tk",
     api_key=os.environ.get("SENDGRID_API_KEY"),
 ):
     msg = Message(subject, sender=from_email, recipients=[to])
