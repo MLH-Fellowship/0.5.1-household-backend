@@ -168,3 +168,18 @@ def test_user_update_house(client: Client):
     json_house = house_resp.get_json()
     assert json_house["status"] == "success"
     assert json_house["data"]["name"] == TEST_HOUSE_NEW_NAME
+
+
+@pytest.mark.serial
+def user_get_task_by_id(client: Client):
+    auth = authenticate_user1(client)
+    resp = client.get("/house/user", headers={"Authorization": auth})
+    json_resp = resp.get_json()
+    house_1 = json_resp["data"][0]
+    get_tasks_resp = client.get(
+        "/house/{}/task/all".format(house_1), headers={"Authorization": auth}
+    ).get_json()
+    task_resp = client.get(
+        "/task/{}".format(get_tasks_resp["data"][0]["task_id"])
+    ).get_json()
+    assert task_resp["status"] == "success"
