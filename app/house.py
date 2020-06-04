@@ -156,10 +156,7 @@ def generic_invite(house_id):
             ),
         )
         return jsonify(data=token, msg="", status="success")
-    else:
-        return (
-            jsonify(
-                status="error", msg="A house with that ID cannot be found.", data=""
-            ),
-            404,
-        )
+    return (
+        jsonify(status="error", msg="A house with that ID cannot be found.", data=""),
+        404,
+    )
