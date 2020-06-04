@@ -2,7 +2,7 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MLH-Fellowship/0.5.1-household.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MLH-Fellowship/0.5.1-household/context:python) [![Total alerts](https://img.shields.io/lgtm/alerts/g/MLH-Fellowship/0.5.1-household.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MLH-Fellowship/0.5.1-household/alerts/)
 
 ## Structure
-Push only stuff ready to go to the `master` branch – it will be automatically deployed to Heroku.
+Push only stuff ready to go to the `master` branch – it will be automatically deployed to Heroku (only after the CI passes, though)!
 
 ## Runing migrations.
 

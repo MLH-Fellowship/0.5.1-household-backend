@@ -32,7 +32,7 @@ TASK1_FREQUENCY = 3600
 def get_house1_id(client, auth):
     resp = client.get("/house/user", headers={"Authorization": auth})
     json_resp = resp.get_json()
-    return json_resp["data"][0]
+    return json_resp["data"][0]["house_id"]
 
 
 @pytest.fixture
@@ -227,7 +227,7 @@ def test_user_get_task_by_id(client: Client):
     auth = authenticate_user1(client)
     resp = client.get("/house/user", headers={"Authorization": auth})
     json_resp = resp.get_json()
-    house_1 = json_resp["data"][0]
+    house_1 = json_resp["data"][0]["house_id"]
     get_tasks_resp = client.get(
         "/house/{}/task/all".format(house_1), headers={"Authorization": auth}
     ).get_json()
@@ -242,9 +242,7 @@ def test_user_get_task_by_id(client: Client):
 @pytest.mark.serial
 def test_user_update_task(client: Client):
     auth = authenticate_user1(client)
-    resp = client.get("/house/user", headers={"Authorization": auth})
-    json_resp = resp.get_json()
-    house_1 = json_resp["data"][0]
+    house_1 = get_house1_id(client, auth)
     get_tasks_resp = client.get(
         "/house/{}/task/all".format(house_1), headers={"Authorization": auth}
     ).get_json()
