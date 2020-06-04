@@ -39,17 +39,16 @@ def create_app() -> Flask:
     app.config["MAIL_SERVER"] = "localhost"
     app.config["MAIL_PORT"] = "25"
     if not os.environ.get("TESTING"):
-        app.config["MAIL_SERVER"] = "smpt.sendgrid.net"
-        app.config["MAIL_PORT"] = "587"
-        app.config["MAIL_USERNAME"] = os.environ.get("SENDGRID_USERNAME")
-        app.config["MAIL_PASSWORD"] = os.environ.get("SENDGRID_PASSWORD")
+        mail.server = "smpt.sendgrid.net"
+        mail.port = "587"
+        mail.username = os.environ.get("SENDGRID_USERNAME")
+        mail.password = os.environ.get("SENDGRID_PASSWORD")
     if os.environ.get("SECRET_KEY"):
         app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
-
     # Register blueprints
     from app.auth import auth_blueprint
     from app.task import task_blueprint
