@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from app.models import Task, User, House
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -70,3 +70,35 @@ def find_task_blueprint(task_id):
         msg="",
         status="success",
     )
+
+
+@task_blueprint.route("/<int:task_id>/update", methods=("POST", "UPDATE"))
+@jwt_required
+def update_task(task_id):
+    user: User = User.query.get(get_jwt_identity())
+    task: Task = Task.query.get(task_id)
+    if not task:
+        return jsonify(msg="Could not find that task", status="error", data=""), 404
+    house: House = House.query.get(task.house_id)
+    if not house in user.houses:
+        return (
+            jsonify(
+                msg="You don't have permission to do that.", status="error", data=""
+            ),
+            403,
+        )
+    try:
+        task.name = request.json["name"]
+    except TypeError:
+        pass
+    try:
+        task.description = request.json["description"]
+    except TypeError:
+        pass
+    try:
+        task.frequency = request.json["description"]
+    except TypeError:
+        pass
+    db.session.commit()
+    return jsonify(data=task.id, status="success", msg="Updated that task.")
+
