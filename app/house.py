@@ -1,9 +1,13 @@
 from flask import Blueprint, jsonify, current_app, request, url_for
-from app.models import House, User
+from app.models import House, User, Task
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.utils import error_missing_json_key
 import jwt
 from app import db
+import sqlalchemy.exc as exc
+from app import q
+import datetime
+from app.schedule import schedule_user_task
 
 house_blueprint = Blueprint("house", __name__, url_prefix="/house")
 
@@ -203,3 +207,53 @@ def update_house():
     return jsonify(
         {"msg": "Updated successfully!", "status": "success", "data": house.id}
     )
+
+
+@house_blueprint.route("<int:house_id>/add/task", methods=("PUT", "POST"))
+@jwt_required
+def add_house_task(house_id):
+    try:
+        name = request.json["name"]
+        description = request.json["description"]
+        frequency = request.json["frequency"]
+    except TypeError:
+        return error_missing_json_key("name", "description", "frequency"), 400
+    user: User = User.query.get(get_jwt_identity())
+    if not user:
+        return (
+            jsonify(status="error", msg="The supplied token is invalid.", data=""),
+            400,
+        )
+    house: House = House.query.get(house_id)
+    if not house:
+        return (
+            jsonify(
+                status="error", msg="The requested house could not be found", data=""
+            ),
+            404,
+        )
+    if not house in user.houses:
+        return (
+            jsonify(
+                status="error", msg="You don't have permission to do that.", data=""
+            ),
+            403,
+        )
+    new_task = Task(
+        name=name, description=description, house_id=house_id, frequency=frequency
+    )
+    try:
+        db.session.add(new_task)
+        db.session.commit()
+        db.session.refresh(new_task)
+    except exc.DatabaseError:
+        return (
+            jsonify(
+                msg="Error adding that task to the database", status="error", data=""
+            ),
+            500,
+        )
+    q.enqueue_at(
+        datetime.datetime.now() + new_task.frequency, schedule_user_task, new_task.id
+    )
+    return jsonify(msg="Created a new task!", status="success", data=new_task.id)

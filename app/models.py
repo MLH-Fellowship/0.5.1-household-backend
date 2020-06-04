@@ -13,6 +13,9 @@ class House(db.Model):
     name = db.Column(db.String(64), index=True, unique=True)
     description = db.Column(db.String(1024))
 
+    tasks = db.relationship("Task", backref="house", lazy=True)
+    users = db.relationship("User", secondary=user_house)
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
