@@ -161,8 +161,6 @@ def all_user_houses():
                     "house_id": x.id,
                     "name": x.name,
                     "description": x.description,
-                    "tasks": x.tasks,
-                    "users": x.users,
                 },
                 user.houses,
             )
