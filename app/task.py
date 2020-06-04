@@ -97,7 +97,7 @@ def update_task(task_id):
     except KeyError:
         pass
     try:
-        task.frequency = request.json["description"]
+        task.frequency = request.json["frequency"]
     except KeyError:
         pass
     db.session.commit()
