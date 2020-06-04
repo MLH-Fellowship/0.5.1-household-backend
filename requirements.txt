@@ -10,4 +10,4 @@ requests
 gunicorn
 eventlet
 Flask-Cors
-
+flask_mail

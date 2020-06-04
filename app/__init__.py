@@ -6,17 +6,21 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
+from flask_mail import Mail
 
 from worker import conn
 
 q = Queue(connection=conn)
 db = SQLAlchemy()
 migrate = Migrate()
+mail = Mail()
 jwt = JWTManager()
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
+    if os.environ.get("TESTING"):
+        app.config["TESTING"] = True
     CORS(app)
 
     @app.route("/")
@@ -32,11 +36,19 @@ def create_app() -> Flask:
     app.config["JWT_HEADER_TYPE"] = ""
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600
     app.config["SECRET_KEY"] = str(os.urandom(512))
+    app.config["MAIL_SERVER"] = "localhost"
+    app.config["MAIL_PORT"] = "25"
+    if not os.environ.get("TESTING"):
+        app.config["MAIL_SERVER"] = "smpt.sendgrid.net"
+        app.config["MAIL_PORT"] = "587"
+        app.config["MAIL_USERNAME"] = os.environ.get("SENDGRID_USERNAME")
+        app.config["MAIL_PASSWORD"] = os.environ.get("SENDGRID_PASSWORD")
     if os.environ.get("SECRET_KEY"):
         app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    mail.init_app(app)
 
     # Register blueprints
     from app.auth import auth_blueprint
