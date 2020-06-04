@@ -8,7 +8,6 @@ user_house = db.Table(
 )
 
 
-
 class House(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
@@ -42,7 +41,7 @@ class User(db.Model):
 
     houses = db.relationship("House", secondary=user_house)
 
-    tasks = db.relationship("UserTask", secondary=UserTask)
+    tasks = db.relationship("UserTask", secondary="user_task")
 
     def set_password(self, password) -> None:
         self.password_hash = generate_password_hash(password)
