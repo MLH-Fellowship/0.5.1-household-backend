@@ -84,17 +84,7 @@ def join_house():
 
 @house_blueprint.route("/<int:house_id>/user/invite/<string:identifier>")
 def specific_email(house_id, identifier):
-    house = House.query.get(house_id)
-    if not house.users.filter(
-        (User.username == identifier) | (User.email == identifier)
-    ).first():
-        return jsonify(
-            {
-                "status": "error",
-                "msg": "You don't have permission to do this",
-                "data": "",
-            }
-        )
+
     user = User.filter(
         (User.username == identifier) | (User.email == identifier)
     ).first()
@@ -111,6 +101,15 @@ def specific_email(house_id, identifier):
                 status="error", msg="A house with that ID cannot be found", data=""
             ),
             404,
+        )
+    house = House.query.get(house_id)
+    if not house in user.houses:
+        return jsonify(
+            {
+                "status": "error",
+                "msg": "You don't have permission to do this",
+                "data": "",
+            }
         )
     token = jwt.encode(
         {
