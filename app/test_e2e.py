@@ -23,6 +23,7 @@ TEST_HOUSE_DESCRIPTION = "a house"
 TEST_HOUSE_NEW_NAME = "house2"
 
 TASK1_NAME = "task1"
+TASK1_UPDATED_NAME = "task1v2"
 TASK1_DESCRIPTION = "task1_description"
 TASK1_FREQUENCY = 3600
 
@@ -207,7 +208,7 @@ def test_user_get_tasks(client: Client):
 
 
 @pytest.mark.serial
-def user_get_task_by_id(client: Client):
+def test_user_get_task_by_id(client: Client):
     auth = authenticate_user1(client)
     resp = client.get("/house/user", headers={"Authorization": auth})
     json_resp = resp.get_json()
@@ -216,6 +217,30 @@ def user_get_task_by_id(client: Client):
         "/house/{}/task/all".format(house_1), headers={"Authorization": auth}
     ).get_json()
     task_resp = client.get(
-        "/task/{}".format(get_tasks_resp["data"][0]["task_id"])
+        "/task/{}".format(get_tasks_resp["data"][0]["task_id"]),
+        headers={"Authorization": auth},
     ).get_json()
-    assert task_resp["status"] == "success"
+    assert task_resp["data"]["name"] == TASK1_NAME
+    assert task_resp["data"]["frequency"] == TASK1_FREQUENCY
+
+
+@pytest.mark.serial
+def test_user_update_task(client: Client):
+    auth = authenticate_user1(client)
+    resp = client.get("/house/user", headers={"Authorization": auth})
+    json_resp = resp.get_json()
+    house_1 = json_resp["data"][0]
+    get_tasks_resp = client.get(
+        "/house/{}/task/all".format(house_1), headers={"Authorization": auth}
+    ).get_json()
+    task_update_resp = client.post(
+        "/task/{}/update".format(get_tasks_resp["data"][0]["task_id"]),
+        headers={"Authorization": auth},
+        json={"name": TASK1_UPDATED_NAME},
+    ).get_json()
+    assert task_update_resp["status"] == "success"
+    task_resp = client.get(
+        "/task/{}".format(get_tasks_resp["data"][0]["task_id"]),
+        headers={"Authorization": auth},
+    ).get_json()
+    assert task_resp["data"]["name"] == TASK1_UPDATED_NAME

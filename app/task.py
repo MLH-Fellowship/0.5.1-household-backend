@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.models import Task, User, House
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from app import db
 
 
 task_blueprint = Blueprint("user_task", __name__, url_prefix="/task")
@@ -52,7 +53,7 @@ def find_task_blueprint(task_id):
     task: Task = Task.query.get(task_id)
     if not task:
         return jsonify(msg="Could not find that task.", status="error", data=""), 404
-    house: House = Task.query.get(task.house_id)
+    house: House = House.query.get(task.house_id)
     if not house in user.houses:
         return (
             jsonify(
@@ -89,16 +90,15 @@ def update_task(task_id):
         )
     try:
         task.name = request.json["name"]
-    except TypeError:
+    except KeyError:
         pass
     try:
         task.description = request.json["description"]
-    except TypeError:
+    except KeyError:
         pass
     try:
         task.frequency = request.json["description"]
-    except TypeError:
+    except KeyError:
         pass
     db.session.commit()
     return jsonify(data=task.id, status="success", msg="Updated that task.")
-
