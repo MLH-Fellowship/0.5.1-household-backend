@@ -135,14 +135,13 @@ def specific_email(house_id, identifier):
 def all_user_houses():
     user = get_jwt_identity()
     db_user: User = User.query.get(user)
-    return_data = jsonify(
+    return jsonify(
         {
             "data": list(map(lambda x: x.id, db_user.houses)),
             "msg": "",
             "status": "success",
         }
     )
-    return return_data
 
 
 @house_blueprint.route("/<int:house_id>/user/invite")
