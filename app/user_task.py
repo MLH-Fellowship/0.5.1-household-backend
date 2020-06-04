@@ -1,27 +1,43 @@
 from flask import Blueprint, jsonify
-from app.models import UserTask, UserHouse
+from app.models import UserTask, Task, User, House
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 
 user_task_blueprint = Blueprint("user_task", __name__)
 
 
-@user_task_blueprint.route("/task/<int:identifier>/user_task/", \
-                           methods=("GET",))
-def get_task(identifier):
-    user_task: UserTask = UserTask.query.get(identifier)
+@user_task_blueprint.route("/task/<int:task_id>/user_task/", methods=("GET",))
+@jwt_required
+def get_task(task_id):
+    task: Task = Task.query.get(task_id)
+    user: User = User.query.get(get_jwt_identity())
+    if not task:
+        return (
+            jsonify({"msg": "That task cannot be found", "status": "error", data: ""}),
+            404,
+        )
 
-    if not user_task:
-        return jsonify({"data": identifier, "status": "error", \
-            "msg": "A user_task with that identifier does not exist."}), 403
+    house = House.query.get(task.house_id)
 
-    data = {}
-    data["user_id"] = user_task.user_id
-    data["task_id"] = user_task.task_id
-    data["deadline"] = user_task.deadline
+    if house not in user.houses:
+        return jsonify(
+            msg="You don't have permission to view this task's assignments.",
+            status="error",
+            data="",
+        )
 
-    # Get house id from UserHouse using user_id
-    user_house: UserHouse = UserHouse.query.filter(UserHouse.user_id == \
-                                                   user_task.user_id).first()
-    data["house_id"] = user_house.house_id
-
-    return jsonify(data=data, msg="", status="success"), 200
+    return jsonify(
+        data=list(
+            map(
+                lambda t: {
+                    "task_id": t.id,
+                    "deadline": t.deadline.timestamp(),
+                    "done": t.done,
+                    "user_id": t.user_id,
+                },
+                task.user_tasks,
+            )
+        ),
+        status="success",
+        msg="",
+    )
