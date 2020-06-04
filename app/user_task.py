@@ -13,7 +13,9 @@ def get_task(task_id):
     user: User = User.query.get(get_jwt_identity())
     if not task:
         return (
-            jsonify({"msg": "That task cannot be found", "status": "error", data: ""}),
+            jsonify(
+                {"msg": "That task cannot be found", "status": "error", "data": ""}
+            ),
             404,
         )
 
