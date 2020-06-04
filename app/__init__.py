@@ -1,10 +1,13 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
-from rq import Queue
-from worker import conn
 import os
+
+from flask import Flask
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from rq import Queue
+
+from worker import conn
 
 q = Queue(connection=conn)
 db = SQLAlchemy()
@@ -14,6 +17,7 @@ jwt = JWTManager()
 
 def create_app() -> Flask:
     app = Flask(__name__)
+    CORS(app)
 
     @app.route("/")
     def index():

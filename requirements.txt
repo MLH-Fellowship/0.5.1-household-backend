@@ -9,3 +9,5 @@ rq
 requests
 gunicorn
 eventlet
+Flask-Cors
+
