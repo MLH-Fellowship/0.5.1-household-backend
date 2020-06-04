@@ -58,14 +58,13 @@ def join_house():
                         "status": "success",
                     }
                 )
-            else:
-                return jsonify(
-                    {
-                        "msg": "You cannot use this token – it is for someone else.",
-                        "status": "error",
-                        "data": "",
-                    }
-                )
+            return jsonify(
+                {
+                    "msg": "You cannot use this token – it is for someone else.",
+                    "status": "error",
+                    "data": "",
+                }
+            )
         elif decoded_token["token_type"] == "generic_join_house":
             db_user.houses.append(House.query.get(decoded_token["house_id"]))
             db.session.commit()
