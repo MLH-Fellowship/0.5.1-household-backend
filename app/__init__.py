@@ -39,7 +39,7 @@ def create_app() -> Flask:
     app.config["MAIL_SERVER"] = "localhost"
     app.config["MAIL_PORT"] = "25"
     if not os.environ.get("TESTING"):
-        mail.server = "smpt.sendgrid.net"
+        mail.server = "smtp.sendgrid.net"
         mail.port = "587"
         mail.username = os.environ.get("SENDGRID_USERNAME")
         mail.password = os.environ.get("SENDGRID_PASSWORD")
