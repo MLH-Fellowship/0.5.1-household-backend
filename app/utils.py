@@ -42,4 +42,7 @@ def send_email(
     msg = Message(subject, sender=from_email, recipients=[to])
     msg.body = text
     msg.html = html
-    mail.send(msg)
+    try:
+        mail.send(msg)
+    except Exception as e:
+        print(e)
