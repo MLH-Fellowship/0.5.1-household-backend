@@ -89,7 +89,7 @@ def login():
 def reset_password_form(token):
     try:
         token = jwt.decode(token, os.environ.get("SECRET_KEY"))
-    except:
+    except jwt.DecodeError:
         return "That token isn't valid."
     return render_template(
         "password_reset.jinja",
@@ -127,7 +127,7 @@ def perform_reset(token):
         return "Your new passwords don't match"
     try:
         token = jwt.decode(token, os.environ.get("SECRET_KEY"))
-    except:
+    except jwt.DecodeError:
         return "The token supplied is not valid."
     try:
         if token["token_type"] == "reset_password":
@@ -150,5 +150,5 @@ def verify_email(token):
             user.email_verified = True
             db.session.commit()
             return "Successfully verified your email."
-    except:
+    except jwt.DecodeError:
         return "The token supplied is not valid."
