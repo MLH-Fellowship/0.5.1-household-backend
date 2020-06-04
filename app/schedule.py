@@ -3,6 +3,7 @@ from app.models import UserTask, Task, House, User
 from app.utils import send_email
 import time
 import datetime
+from app import q
 
 
 def schedule_user_task(task_id):
@@ -40,3 +41,4 @@ def schedule_user_task(task_id):
             datetime.datetime.fromtimestamp(new_user_task.deadline).isoformat(),
         ),
     )
+    q.enqueue_at(datetime.datetime.now() + task.frequency, schedule_user_task, task.id)
