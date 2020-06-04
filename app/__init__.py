@@ -10,6 +10,14 @@ from flask_mail import Mail
 
 from worker import conn
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn="https://ecb51a077d15409da801b92c1e4884b5@o402962.ingest.sentry.io/5264949",
+    integrations=[FlaskIntegration()],
+)
+
 q = Queue(connection=conn)
 db = SQLAlchemy()
 migrate = Migrate()
