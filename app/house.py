@@ -5,6 +5,9 @@ from app.utils import error_missing_json_key
 import jwt
 from app import db
 import sqlalchemy.exc as exc
+from app import q
+import datetime
+from app.schedule import schedule_user_task
 
 house_blueprint = Blueprint("house", __name__, url_prefix="/house")
 
@@ -250,4 +253,7 @@ def add_house_task(house_id):
             ),
             500,
         )
+    q.enqueue_at(
+        datetime.datetime.now() + new_task.frequency, schedule_user_task, new_task.id
+    )
     return jsonify(msg="Created a new task!", status="success", data=new_task.id)
