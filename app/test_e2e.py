@@ -72,7 +72,7 @@ def test_login_user_custom_expiry(client: Client):
             "custom_expiry": 1000,
         },
     ).get_json()
-    decoded = jwt.decode(token["data"], verify=False)
+    decoded = jwt.decode(token["data"]["access_token"], verify=False)
     assert (decoded["exp"] - 1000) == decoded["iat"]
 
 
@@ -114,28 +114,28 @@ def test_login_user(client: Client):
     )
     json = resp.get_json()
     assert json["status"] == "success"
-    assert len(json["data"]) > 5
+    assert len(json["data"]["access_token"]) > 5
 
 
 def authenticate_user1(client: Client):
     return client.post(
         "/auth/login",
         json=dict(identifier=TEST_USER1_USERNAME, password=TEST_USER1_PASSWORD),
-    ).get_json()["data"]
+    ).get_json()["data"]["access_token"]
 
 
 def authenticate_user2(client: Client):
     return client.post(
         "/auth/login",
         json=dict(identifier=TEST_USER2_USERNAME, password=TEST_USER2_PASSWORD),
-    ).get_json()["data"]
+    ).get_json()["data"]["access_token"]
 
 
 def authenticate_user3(client: Client):
     return client.post(
         "/auth/login",
         json=dict(identifier=TEST_USER3_USERNAME, password=TEST_USER3_PASSWORD),
-    ).get_json()["data"]
+    ).get_json()["data"]["access_token"]
 
 
 @pytest.mark.serial

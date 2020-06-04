@@ -74,22 +74,27 @@ def login():
     user: User = User.query.filter(
         (User.username == identifier) | (User.email == identifier)
     ).first()
+
     if not user:
         return jsonify({"msg": "A user with those details does not exist."}), 403
-    if user.check_password(password):
-        try:
-            access_token = create_access_token(
-                identity=user.id,
-                expires_delta=datetime.timedelta(seconds=request.json["custom_expiry"]),
-            )
-        except KeyError:
-            access_token = create_access_token(identity=user.id)
-        return jsonify(data=access_token, status="success", msg=""), 200
-    else:
+
+    if not user.check_password(password):
         return (
             jsonify({"msg": "The provided password is incorrect.", "status": "error"}),
             403,
         )
+
+    data = {}
+    data["username"] = user.username
+    try:
+        data["access_token"] = create_access_token(
+            identity=user.id,
+            expires_delta=datetime.timedelta(seconds=request.json["custom_expiry"]),
+        )
+    except KeyError:
+        data["access_token"] = create_access_token(identity=user.id)
+
+    return jsonify(data=data, status="success", msg=""), 200
 
 
 @auth_blueprint.route("/password_reset/reset_form/<string:token>")
