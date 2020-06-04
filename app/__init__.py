@@ -35,4 +35,8 @@ def create_app() -> Flask:
     from app.auth import auth_blueprint
 
     app.register_blueprint(auth_blueprint)
+
+    from app.house import house_blueprint
+
+    app.register_blueprint(house_blueprint)
     return app
