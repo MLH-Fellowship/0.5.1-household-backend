@@ -89,6 +89,7 @@ def specific_email(house_id, identifier):
             ),
             404,
         )
+    house = House.query.get(house_id)
     if not house:
         return (
             jsonify(
@@ -96,7 +97,6 @@ def specific_email(house_id, identifier):
             ),
             404,
         )
-    house = House.query.get(house_id)
     if not house in user.houses:
         return jsonify(
             {
