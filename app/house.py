@@ -236,7 +236,9 @@ def add_house_task(house_id):
             ),
             403,
         )
-    new_task = Task(name=name, description=description, house_id=house_id)
+    new_task = Task(
+        name=name, description=description, house_id=house_id, frequency=frequency
+    )
     try:
         db.session.add(new_task)
         db.session.commit()
