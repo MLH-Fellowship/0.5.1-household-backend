@@ -162,6 +162,46 @@ def all_user_houses():
     )
 
 
+@house_blueprint.route("/<int:house_id>/task/all")
+@jwt_required
+def get_house_tasks(house_id):
+    user: User = User.query.get(get_jwt_identity())
+    if not user:
+        return (
+            jsonify(status="error", msg="The provided token is invalid.", data=""),
+            400,
+        )
+    house: House = House.query.get(house_id)
+    if not house:
+        return (
+            jsonify(
+                status="error",
+                msg="A house with those details cannot be found.",
+                data="",
+            ),
+            404,
+        )
+    if not house in user.houses:
+        return jsonify(
+            msg="You don't have permission to do that.", status="error", data=""
+        )
+    return jsonify(
+        msg="",
+        status="success",
+        data=list(
+            map(
+                lambda x: {
+                    "task_id": x.id,
+                    "description": x.description,
+                    "frequency": x.frequency,
+                    "name": x.name,
+                },
+                house.tasks,
+            )
+        ),
+    )
+
+
 @house_blueprint.route("/<int:house_id>/user/invite")
 def generic_invite(house_id):
     house = House.query.get(house_id)
@@ -209,7 +249,7 @@ def update_house():
     )
 
 
-@house_blueprint.route("<int:house_id>/add/task", methods=("PUT", "POST"))
+@house_blueprint.route("<int:house_id>/task/add", methods=("PUT", "POST"))
 @jwt_required
 def add_house_task(house_id):
     try:
@@ -253,7 +293,12 @@ def add_house_task(house_id):
             ),
             500,
         )
-    q.enqueue_at(
-        datetime.datetime.now() + new_task.frequency, schedule_user_task, new_task.id
-    )
+    try:
+        q.enqueue_at(
+            datetime.datetime.now() + new_task.frequency,
+            schedule_user_task,
+            new_task.id,
+        )
+    except:
+        pass
     return jsonify(msg="Created a new task!", status="success", data=new_task.id)
