@@ -20,7 +20,7 @@ def register():
         username = request.json["username"]
         email = request.json["email"]
         password = request.json["password"]
-    except TypeError:
+    except KeyError:
         return error_missing_json_key("username", "email", "password")
     new_user = User(email=email, username=username, email_verified=False)
     new_user.set_password(password)
@@ -68,7 +68,7 @@ def login():
         # either the user's username or email
         identifier = request.json["identifier"]
         password = request.json["password"]
-    except TypeError:
+    except KeyError:
         return error_missing_json_key("identifier", "password")
     user: User = User.query.filter(
         (User.username == identifier) | (User.email == identifier)
