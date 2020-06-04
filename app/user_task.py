@@ -20,7 +20,7 @@ def get_task(identifier):
     data["deadline"] = user_task.deadline
 
     # Get house id from UserHouse using user_id
-    user_house: UserHouse = UserHouse.query.filter(userhouse.user_id == \
+    user_house: UserHouse = UserHouse.query.filter(UserHouse.user_id == \
                                                    user_task.user_id).first()
     data["house_id"] = user_house.house_id
 
