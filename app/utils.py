@@ -2,6 +2,15 @@ from flask import jsonify
 import json
 import requests
 import os
+import enum
+
+
+# TODO: refactor to use this in creating JWTs
+class CustomJWTTypes(enum.Enum):
+    EMAIL_VERIFY = 1
+    PASSWORD_RESET = 2
+    GENERIC_HOUSE_INVITE = 3
+    SPECIFIC_HOUSE_INVITE = 4
 
 
 def error_missing_json_key(*args):
