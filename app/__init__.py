@@ -35,11 +35,11 @@ def create_app() -> Flask:
 
     # Register blueprints
     from app.auth import auth_blueprint
-    from app.user_task import user_task_blueprint
+    from app.task import task_blueprint
     from app.house import house_blueprint
 
     app.register_blueprint(auth_blueprint)
-    app.register_blueprint(user_task_blueprint)
+    app.register_blueprint(task_blueprint)
     app.register_blueprint(house_blueprint)
-    
+
     return app
