@@ -21,7 +21,7 @@ class Task(db.Model):
     description = db.Column(db.String(1024))
     frequency = db.Column(db.Integer)
 
-    user_tasks = db.relationship("UserTask", backref="task", lazy=True)
+    user_tasks = db.relationship("UserTask", backref="user_task", lazy=True)
 
 
 class UserTask(db.Model):
@@ -41,7 +41,7 @@ class User(db.Model):
 
     houses = db.relationship("House", secondary=user_house)
 
-    tasks = db.relationship("UserTask", secondary="user_task")
+    tasks = db.relationship("UserTask", backref="user")
 
     def set_password(self, password) -> None:
         self.password_hash = generate_password_hash(password)
