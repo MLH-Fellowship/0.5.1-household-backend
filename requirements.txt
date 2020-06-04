@@ -11,3 +11,4 @@ gunicorn
 eventlet
 Flask-Cors
 flask_mail
+sentry-sdk[flask]==0.14.4
