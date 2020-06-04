@@ -164,7 +164,7 @@ def all_user_houses():
 
 @house_blueprint.route("/<int:house_id>/task/all")
 @jwt_required
-def get_house_tasks(house_id: int):
+def get_house_tasks(house_id):
     user: User = User.query.get(get_jwt_identity())
     if not user:
         return (
