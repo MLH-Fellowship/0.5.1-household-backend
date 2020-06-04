@@ -8,6 +8,28 @@ from app import db
 house_blueprint = Blueprint("house", __name__, url_prefix="/house")
 
 
+@house_blueprint.route("/<int:house_id>/get")
+@jwt_required
+def get_house(house_id):
+    house = House.query.get(house_id)
+    user: User = User.query.get(get_jwt_identity())
+    if not user:
+        return jsonify(status="error", msg="The supplied token is invalid.", data="")
+    if not house in user.houses:
+        return jsonify(
+            status="error", msg="You don't have permission to do that", data=""
+        )
+    return jsonify(
+        data={
+            "house_id": house.id,
+            "name": house.name,
+            "description": house.description,
+        },
+        status="success",
+        msg="",
+    )
+
+
 @house_blueprint.route("/add", methods=("POST",))
 @jwt_required
 def add_house():
@@ -151,4 +173,33 @@ def generic_invite(house_id):
     return (
         jsonify(status="error", msg="A house with that ID cannot be found.", data=""),
         404,
+    )
+
+
+@house_blueprint.route("/update", methods=("POST", "UPDATE"))
+@jwt_required
+def update_house():
+    try:
+        house_id = request.json["house_id"]
+    except TypeError:
+        return jsonify(error_missing_json_key("house_id"))
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return jsonify(msg="The token supplied is not valid.", data="", status="error")
+    house: House = House.query.get(house_id)
+    if house not in user.houses:
+        return jsonify(
+            msg="You don't have permission to do that.", data="", status="error"
+        )
+    try:
+        house.name = request.json["name"]
+    except KeyError:
+        pass
+    try:
+        house.value = request.json["description"]
+    except KeyError:
+        pass
+    db.session.commit()
+    return jsonify(
+        {"msg": "Updated successfully!", "status": "success", "data": house.id}
     )
