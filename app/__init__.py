@@ -26,6 +26,7 @@ def create_app() -> Flask:
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_HEADER_TYPE"] = ""
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600
     app.config["SECRET_KEY"] = str(os.urandom(512))
     if os.environ.get("SECRET_KEY"):
         app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
