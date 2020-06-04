@@ -52,9 +52,10 @@ def register():
             },
             current_app.secret_key,
         ),
+        _external=not current_app.testing,
     )
     html_content = render_template(
-        "email_verify.jinja", email_verify_url=verify_email_url
+        "email_verify.jinja", verify_email_url=verify_email_url
     )
     send_email(
         new_user.email,
@@ -109,7 +110,9 @@ def reset_password_form(token):
         return "That token isn't valid."
     return render_template(
         "password_reset.jinja",
-        password_reset_submit=url_for("auth.perform_reset", token=token),
+        password_reset_submit=url_for(
+            "auth.perform_reset", token=token, _external=not current_app.testing
+        ),
     )
 
 
@@ -130,6 +133,7 @@ def reset_password(identifier):
             },
             current_app.secret_key,
         ),
+        _external=not current_app.testing,
     )
     html_content = render_template("password_email_reset.jinja", reset_link=reset_link)
     send_email(
