@@ -24,7 +24,7 @@ def get_task(identifier):
     return jsonify(data=data, msg="", status="success"), 200
 
 
-@task_blueprint.route("/<int:identifier>/update/", methods=("POST",))
+@task_blueprint.route("/<int:identifier>/update/", methods=("POST","UPDATE",))
 def update_task(identifier):
     task: Task = Task.query.get(identifier)
 
@@ -36,12 +36,12 @@ def update_task(identifier):
         }), 403
 
     # Update database from POST values
-    if "name" in request.form:
-        task.name = request.form["name"]
-    if "description" in request.form:
-        task.description = request.form["description"]
-    if "frequency" in request.form:
-        task.frequency = request.form["frequency"]
+    if "name" in request.json:
+        task.name = request.json["name"]
+    if "description" in request.json:
+        task.description = request.json["description"]
+    if "frequency" in request.json:
+        task.frequency = request.json["frequency"]
 
-    return jsonify(data=identifier, msg="Task updated", status="success"), 200
+    return jsonify(data=identifier, msg="Updated successfully!", status="success"), 200
 
