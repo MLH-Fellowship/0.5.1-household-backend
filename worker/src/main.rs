@@ -2,6 +2,7 @@ extern crate futures;
 type Pool = diesel::r2d2::Pool<diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>>;
 
 use diesel::prelude::*;
+#[derive(Debug)]
 enum TaskRepr {
     AssignUser(i32, i32),
 }
@@ -85,12 +86,11 @@ async fn main() {
             while let Some(n) = delay.next().await {
                 match n {
                     Ok(next_task) => {
-                        tokio::spawn(handle_task(pool.clone(), next_task.into_inner()));
+                        handle_task(pool.clone(), next_task.into_inner()).await;
                     }
                     Err(e) => println!("ERROR: {:?}", e),
                 }
             }
-            tokio::time::delay_for(tokio::time::Duration::from_secs(30)).await;
             match data::schema::worker_task::dsl::worker_task
                 .load::<data::WorkerTask>(&pool.get().unwrap())
             {
@@ -116,6 +116,16 @@ async fn main() {
                                             .unwrap(),
                                     ),
                                 );
+                                match diesel::delete(data::schema::worker_task::dsl::worker_task)
+                                    .filter(data::schema::worker_task::dsl::id.eq(item.id))
+                                    .execute(&pool.get().unwrap())
+                                {
+                                    Ok(_) => {}
+                                    Err(e) => {
+                                        println!("ERROR: {:?}", e);
+                                    }
+                                };
+                                println!("{:?}", delay.is_empty());
                             }
                             _ => println!("ERROR: {} is an invalid task type", item.task_type),
                         }
@@ -125,5 +135,6 @@ async fn main() {
             }
         }
         .await;
+        tokio::time::delay_for(tokio::time::Duration::from_secs(30)).await;
     }
 }

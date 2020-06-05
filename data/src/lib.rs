@@ -55,7 +55,7 @@ struct UserHouse {
     pub user_id: i32,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Debug)]
 pub struct WorkerTask {
     pub id: i32,
     pub complete_at: chrono::NaiveDateTime,
