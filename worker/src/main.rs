@@ -21,7 +21,6 @@ async fn handle_task(pool: Pool, task: TaskRepr) {
                 return;
             }
         },
-        _ => return,
     };
     let mut user_items: std::collections::HashMap<i32, i32> = std::collections::HashMap::new();
     for item in house_items {
@@ -74,7 +73,8 @@ async fn main() {
     let pool: Pool = diesel::r2d2::Pool::builder()
         .build(
             diesel::r2d2::ConnectionManager::<diesel::PgConnection>::new(
-                std::env::var("DATABASE_URL").unwrap_or("postgres://localhost".to_string()),
+                std::env::var("DATABASE_URL")
+                    .unwrap_or_else(|_| "postgres://localhost".to_string()),
             ),
         )
         .expect("Couldn't create database pool.");
