@@ -6,14 +6,23 @@ Push only stuff ready to go to the `master` branch – it will be automatically
 
 ## Runing migrations.
 
+## Setting up development environment
+ 1. Set up virtual environment
 ```
-# 1. set up virtual environment
 python3 -m venv venv
-# 2. install requirements
+```
+ 2. Install requirements
+```
 pip install -r requirements.txt
-# if it fails – remove psycopg2 from requirements.txt 
-# 3. set `DATABASE_URL` environment variable (otherwise it will use SQLite – this works)
+```
+If it fails – remove psycopg2 from requirements.txt
+
+3. Set `DATABASE_URL` environment variable (otherwise it will use SQLite – this works)
+```
 export DATABASE_URL=<some SQL URI>
-# 4. run migrations
+```
+
+4. Run migrations
+```
 flask db upgrade
 ```
