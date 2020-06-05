@@ -47,19 +47,23 @@ async fn handle_task(pool: Pool, task: TaskRepr) {
     let (_, task_id) = match task {
         TaskRepr::AssignUser(i1, i2) => (i1, i2),
     };
-    match diesel::insert_into(data::schema::user_task::dsl::user_task)
-        .values(data::NewUserTask {
-            task_id,
-            user_id: smallest_user.0,
-            done: false,
-            deadline: (chrono::Utc::now().naive_utc().timestamp()
-                + data::schema::task::dsl::task
-                    .find(task_id)
-                    .first::<data::Task>(&pool.get().unwrap())
-                    .unwrap()
-                    .frequency as i64) as i32,
-        })
-        .execute(&pool.get().unwrap())
+    let p2 = pool.clone();
+    match tokio::task::spawn_blocking(move || {
+        diesel::insert_into(data::schema::user_task::dsl::user_task)
+            .values(data::NewUserTask {
+                task_id,
+                user_id: smallest_user.0,
+                done: false,
+                deadline: (chrono::Utc::now().naive_utc().timestamp()
+                    + data::schema::task::dsl::task
+                        .find(task_id)
+                        .first::<data::Task>(&pool.get().unwrap())
+                        .unwrap()
+                        .frequency as i64) as i32,
+            })
+            .execute(&p2.get().unwrap())
+    })
+    .await
     {
         Ok(_) => {}
         Err(e) => {
@@ -81,60 +85,68 @@ async fn main() {
         .expect("Couldn't create database pool.");
     let mut delay = tokio::time::DelayQueue::<TaskRepr>::new();
     loop {
-        async {
-            use futures::StreamExt;
-            while let Some(n) = delay.next().await {
-                match n {
-                    Ok(next_task) => {
-                        handle_task(pool.clone(), next_task.into_inner()).await;
-                    }
-                    Err(e) => println!("ERROR: {:?}", e),
-                }
-            }
-            match data::schema::worker_task::dsl::worker_task
-                .load::<data::WorkerTask>(&pool.get().unwrap())
-            {
-                Ok(task_list) => {
-                    for item in task_list {
-                        match item.task_type {
-                            1 => {
-                                let mut split_string = item.context.split(',');
-                                let house_id = split_string.next().unwrap().parse::<i32>().unwrap();
-                                let task_id = split_string.next().unwrap().parse::<i32>().unwrap();
-                                delay.insert_at(
-                                    TaskRepr::AssignUser(house_id, task_id),
-                                    tokio::time::Instant::from_std(
-                                        std::time::Instant::now()
-                                            + std::time::Duration::from_secs_f64(
-                                                item.complete_at.timestamp() as f64,
-                                            )
-                                            .checked_sub(
-                                                std::time::SystemTime::now()
-                                                    .duration_since(std::time::UNIX_EPOCH)
-                                                    .expect("Time seems to have gone backwards."),
-                                            )
-                                            .unwrap(),
-                                    ),
-                                );
-                                match diesel::delete(data::schema::worker_task::dsl::worker_task)
-                                    .filter(data::schema::worker_task::dsl::id.eq(item.id))
-                                    .execute(&pool.get().unwrap())
-                                {
-                                    Ok(_) => {}
-                                    Err(e) => {
-                                        println!("ERROR: {:?}", e);
-                                    }
-                                };
-                                println!("{:?}", delay.is_empty());
-                            }
-                            _ => println!("ERROR: {} is an invalid task type", item.task_type),
-                        }
-                    }
+        use futures::StreamExt;
+        while let Some(n) = delay.next().await {
+            match n {
+                Ok(next_task) => {
+                    let p2 = pool.clone();
+                    match tokio::task::spawn_blocking(move || {
+                        handle_task(p2, next_task.into_inner())
+                    })
+                    .await
+                    {
+                        Ok(_) => {}
+                        Err(e) => println!("ERROR: {:?}", e),
+                    };
                 }
                 Err(e) => println!("ERROR: {:?}", e),
             }
         }
-        .await;
+        match data::schema::worker_task::dsl::worker_task
+            .load::<data::WorkerTask>(&pool.get().unwrap())
+        {
+            Ok(task_list) => {
+                for item in task_list {
+                    match item.task_type {
+                        1 => {
+                            let mut split_string = item.context.split(',');
+                            let house_id = split_string.next().unwrap().parse::<i32>().unwrap();
+                            let task_id = split_string.next().unwrap().parse::<i32>().unwrap();
+                            delay.insert_at(
+                                TaskRepr::AssignUser(house_id, task_id),
+                                tokio::time::Instant::from_std(
+                                    std::time::Instant::now()
+                                        + std::time::Duration::from_secs_f64(
+                                            item.complete_at.timestamp() as f64,
+                                        )
+                                        .checked_sub(
+                                            std::time::SystemTime::now()
+                                                .duration_since(std::time::UNIX_EPOCH)
+                                                .expect("Time seems to have gone backwards."),
+                                        )
+                                        .unwrap(),
+                                ),
+                            );
+                            let cloned_pool = pool.clone();
+                            match tokio::task::spawn_blocking(move || {
+                                diesel::delete(data::schema::worker_task::dsl::worker_task)
+                                    .filter(data::schema::worker_task::dsl::id.eq(item.id))
+                                    .execute(&cloned_pool.get().unwrap())
+                            })
+                            .await
+                            {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    println!("ERROR: {:?}", e);
+                                }
+                            };
+                        }
+                        _ => println!("ERROR: {} is an invalid task type", item.task_type),
+                    }
+                }
+            }
+            Err(e) => println!("ERROR: {:?}", e),
+        }
         tokio::time::delay_for(tokio::time::Duration::from_secs(30)).await;
     }
 }
