@@ -58,11 +58,4 @@ joinable!(user_houses -> user (user_id));
 joinable!(user_task -> task (task_id));
 joinable!(user_task -> user (user_id));
 
-allow_tables_to_appear_in_same_query!(
-    house,
-    task,
-    user,
-    user_houses,
-    user_task,
-    worker_task,
-);
+allow_tables_to_appear_in_same_query!(house, task, user, user_houses, user_task, worker_task,);
