@@ -1,13 +1,12 @@
 from flask import Blueprint, jsonify, current_app, request, url_for
-from app.models import House, User, Task
+from app.models import House, User, Task, WorkerTask
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.utils import error_missing_json_key
 import jwt
 from app import db
 import sqlalchemy.exc as exc
-from app import q
+
 import datetime
-from app.schedule import schedule_user_task
 
 house_blueprint = Blueprint("house", __name__, url_prefix="/house")
 
@@ -300,11 +299,13 @@ def add_house_task(house_id):
             500,
         )
     try:
-        q.enqueue_at(
-            datetime.datetime.now() + new_task.frequency,
-            schedule_user_task,
-            new_task.id,
+        wt = WorkerTask(
+            complete_at=datetime.datetime.now() + new_task.frequency,
+            context="{},{}".format(house.id, new_task.id),
+            task_type=1,
         )
+        db.session.add(wt)
+        db.session.commit()
     except:
         pass
     return jsonify(msg="Created a new task!", status="success", data=new_task.id)
