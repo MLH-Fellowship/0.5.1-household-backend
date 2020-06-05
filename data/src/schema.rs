@@ -21,6 +21,7 @@ table! {
         id -> Int4,
         username -> Text,
         email -> Text,
+        email_verified -> Bool,
         password_hash -> Text,
     }
 }

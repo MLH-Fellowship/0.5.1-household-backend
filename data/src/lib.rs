@@ -3,7 +3,7 @@ extern crate diesel;
 
 pub mod schema;
 
-use schema::user_task;
+use schema::{house, task, user_task};
 
 #[derive(Queryable)]
 pub struct User {
@@ -14,15 +14,26 @@ pub struct User {
     pub password_hash: String,
 }
 
-#[derive(Queryable)]
-struct House {
+#[derive(Queryable, Identifiable)]
+#[table_name = "task"]
+pub struct Task {
+    pub id: i32,
+    pub name: String,
+    pub house_id: i32,
+    pub description: String,
+    pub frequency: i32,
+}
+
+#[derive(Queryable, Identifiable)]
+#[table_name = "house"]
+pub struct House {
     pub id: i32,
     pub name: String,
     pub description: String,
 }
 
 #[derive(Queryable)]
-struct UserTask {
+pub struct UserTask {
     pub id: i32,
     pub task_id: i32,
     pub user_id: i32,

@@ -2,6 +2,7 @@ create table if not exists "user" (
     id SERIAL PRIMARY KEY,
     username TEXT NOT NULL,
     email TEXT NOT NULL,
+    email_verified BOOLEAN NOT NULL,
     password_hash TEXT NOT NULL
 );
 create table if not exists house (
