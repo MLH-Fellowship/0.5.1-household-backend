@@ -5,7 +5,7 @@ from app.utils import error_missing_json_key
 import jwt
 from app import db
 import sqlalchemy.exc as exc
-from app import q
+
 import datetime
 
 house_blueprint = Blueprint("house", __name__, url_prefix="/house")
